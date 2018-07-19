@@ -23,7 +23,10 @@ export function initMap(ymaps, containerId) {
 
   loadList().then(data => {
     objectManager.add(data);
-  });
+  }).then(() => {
+    myMap.geoObjects.add(objectManager);
+  })
+
 
   // details
   objectManager.objects.events.add('click', event => {
