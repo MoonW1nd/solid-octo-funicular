@@ -22,7 +22,7 @@ Todo:
   ✔ Не корректное использование стрелочных функций @done(18-07-20 00:23)
   ✔ Chart.js: не корректное задание `max` для Tick Options @done(18-07-20 00:44)
   ✔ Первый вариат решения отображения кластеров: удалить `objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');`, а `clusterIconLayout: 'default#pieChart',`; @done(18-07-21 17:41)
-  ☐ `clusterIconLayout` не нужен так как используются `presets`
+  ☐ Второй варинт: `clusterIconLayout` не нужен так как используются `presets`, используем событие 'add' на кластере для установки новых стилей
   ☐ popup.js не корректные отступы в 4 пробела вместо 2
   ☐ лишние пробелы в конце строк: api.js, mapper.js, chart.js,
   ☐ форматирование объекта: chart.js,

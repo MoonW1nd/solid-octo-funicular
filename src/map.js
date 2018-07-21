@@ -12,7 +12,7 @@ export function initMap(ymaps, containerId) {
   const objectManager = new ymaps.ObjectManager({
     clusterize: true,
     gridSize: 64,
-    clusterIconLayout: 'default#pieChart',
+    preset: 'islands#greenClusterIcons',
     clusterDisableClickZoom: false,
     geoObjectOpenBalloonOnClick: false,
     geoObjectHideIconOnBalloonOpen: false,
@@ -20,11 +20,19 @@ export function initMap(ymaps, containerId) {
   });
 
 
-  loadList().then(data => {
-    objectManager.add(data);
-  }).then(() => {
-    myMap.geoObjects.add(objectManager);
-  })
+  loadList()
+    .then(data => { objectManager.add(data); })
+    .then(() => { myMap.geoObjects.add(objectManager); })
+
+
+  // установка стиля для кластеров содержащих неисправные станции
+  objectManager.clusters.events.add('add', () => {
+    objectManager.clusters.each((cluster) => {
+      if (cluster.features.some((feature) => feature.isActive === false)) {
+        objectManager.clusters.setClusterOptions(cluster.id, { preset: 'islands#redClusterIcons' })
+      }
+    })
+  });
 
 
   // details
