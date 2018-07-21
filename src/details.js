@@ -7,6 +7,8 @@ export function getDetailsContentLayout(ymaps) {
             <div class="details-info">
                 <div class="details-label">base station</div>
                 <div class="details-title">{{properties.details.serialNumber}}</div>
+                <div class="details-label">coordinates</div>
+                <div class="details-title">{{properties.details.lat}}, {{properties.details.long}}</div>
                 {% if (properties.details.isActive) %}
                 <div class="details-state details-state_active">active</div>
                 {% else %}
