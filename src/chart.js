@@ -20,7 +20,6 @@ export function createChart(container, data, isActive) {
 
   const borderColor = getColor(isActive);
   const backgroundColor = getColor(isActive, 0.5);
-  console.log(data);
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
