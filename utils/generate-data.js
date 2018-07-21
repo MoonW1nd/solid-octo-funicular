@@ -23,7 +23,7 @@ exports.generateData = function() {
       serialNumber: faker.address.zipCode(),
       isActive: Math.random() > 0.03,
       lat: 55.755222 + rand() * 0.12242,
-      long: 37.62102 + rand() * 0.180189
+      long: 37.62102 + rand() * 0.180189,
     });
   }
 
@@ -35,6 +35,6 @@ exports.generateDetails = function({ isActive }) {
 
   return {
     connections: connections,
-    chart: generateChartData(isActive).concat(connections)
+    chart: generateChartData(isActive).concat(connections),
   };
 };
