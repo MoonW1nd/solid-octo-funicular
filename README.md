@@ -38,7 +38,7 @@ npm start
 
 #### Описание решения
 
-Исходя из описания ошибки понятно, что мы хотим ипортировать из файла `src/map.js`, экспортируемое свойство "по умолчанию", которое не найдено. Делаем вывод, что скорре всего не правильно реализована работа с es6 модулями.
+Исходя из описания ошибки понятно, что мы хотим импортировать из файла `src/map.js`, экспортируемое свойство "по умолчанию", которое не найдено. Делаем вывод, что скорее всего не правильно реализована работа с es6 модулями.
 
 Решается 2-мя разными способами:
 
@@ -53,6 +53,7 @@ import { initMap } from "./map";
 export default function initMap(ymaps, containerId) {
 // code...
 ```
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/c51bef1577bf334e7236becaa0cd20270920c6d9) с исправлениями
 
 ### 2. По адресу http://localhost:9000 должна открываться карта с метками.
 
@@ -66,7 +67,10 @@ export default function initMap(ymaps, containerId) {
   height: 100%;
  }
 ```
-Но пока меток никаких нет. Читаем код в `src/map.js` и узнаем что для управленияе метками используется `objectManager`. Идем в [документацию к API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/ObjectManager-docpage/#method_detail__add) и ищем, как добавляются метки на карту. Находим метод `add` и вставляем его цепочку промисов, которая отвечает за загрузку данных;
+
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/c51bef1577bf334e7236becaa0cd20270920c6d9) с исправлениями
+
+Но пока меток никаких нет. Читаем код в `src/map.js` и узнаем что для управления метками используется `objectManager`. Идем в [документацию к API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/ObjectManager-docpage/#method_detail__add) и ищем, как добавляются метки на карту. Находим метод `add` и вставляем его цепочку промисов, которая отвечает за загрузку данных;
 
 ```js
 loadList().then(data => {
@@ -76,13 +80,15 @@ loadList().then(data => {
 })
 ```
 
-Но пока на карте Москвы ничего не отображется. Однако если уменьшить масштаб, мы найдем метки в другой точке мира. Делаем вывод, что неправильно обрабатываются получаемые координаты.
-- Сначала смотрим откуда экспортируется функия `loadList`.
+Но пока на карте Москвы ничего не отображается. Однако если уменьшить масштаб, мы найдем метки в другой точке мира. Делаем вывод, что неправильно обрабатываются получаемые координаты.
+- Сначала смотрим откуда экспортируется функция `loadList`.
 - Идем в файл `src/api.js`. Там видим что ответ от сервера разбирается функцией `mapServerData`, которая экспортируется из `mappers.js`.
 - В `src/mappers.js` видим, что массив координат не правильно задается, перепутаны широта и долгота.
 - Меняем их местами.
 
 Теперь метки отображаются в нужном месте.
+
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/3d95f86a64d14dafedddefd7b82843c5e802f2f6) с исправлениями
 
 ### 3. Должна правильно работать вся функциональность, перечисленная в условиях задания.
 Имеем список задач:<br/>
@@ -105,9 +111,9 @@ loadList().then(data => {
 Uncaught TypeError: Cannot read property 'destroy' of null
 ```
 - Исходя из нее мы делаем вывод, что в методе показа попапа, есть место где метод `destroy` был вызван на `null`.
-- Ищем метод `destroy` в коде, и находим его в файле `details.js`, из которого экспортируется функция `getDetailsContentLayout`, которaя отвечает за создание лэйаута внутри попапа(Bolloon).
-- Видим что метод `destroy` используется, внутри функций переопеделения стандартных методов `build` и `clear` `templateLayoutFactory` ([Doc](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/layout.templateBased.Base-docpage/)).
-- Однако эти функции переопределения используют стрелочные функции, стрелочные функции вообще не имееют контекста `this`, поиск `this` осуществляется так же, как и поиск обычной переменной, то есть, выше в замыкании, и соответственно `this` в этих функциях некорректен.
+- Ищем метод `destroy` в коде, и находим его в файле `details.js`, из которого экспортируется функция `getDetailsContentLayout`, которая отвечает за создание лэйаута внутри попапа(Bolloon).
+- Видим что метод `destroy` используется, внутри функций переопределения стандартных методов `build` и `clear` `templateLayoutFactory` ([Doc](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/layout.templateBased.Base-docpage/)).
+- Однако эти функции переопределения используют стрелочные функции, стрелочные функции вообще не имеют контекста `this`, поиск `this` осуществляется так же, как и поиск обычной переменной, то есть, выше в замыкании, и соответственно `this` в этих функциях некорректен.
 - Заменяем стрелочные функции на обычные.
 
 Теперь при клике на маркер отображается попап с информацией и графиком, только график пуст.
@@ -117,6 +123,8 @@ Uncaught TypeError: Cannot read property 'destroy' of null
 - читаем [API `chart.js`](http://www.chartjs.org/docs/latest/) и находим, что при формировании tiksOptions в `yAxis`, параметр max([api](http://www.chartjs.org/docs/latest/axes/cartesian/linear.html?h=max)) задан в 0, что и мешает корректной отрисовке графика.
 - удаляем параметр `max` из tiksOptions в `yAxis`
 
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/6c74fb35624a35b97229ab747c1373d90437554a) с исправлениями
+
 Теперь нет только координат, добавляем их в шаблон в файле `src/details.js`
 
 ```js
@@ -124,7 +132,11 @@ Uncaught TypeError: Cannot read property 'destroy' of null
 <div class="details-title">{{properties.details.lat}}, {{properties.details.long}}</div>
 ```
 
-Заметил что график нагрузки начал немного перекрываться попапом из-за всхлопывания margin, добавим фикс в `.details-info`:
+Заметил что график нагрузки начал немного перекрываться попапом из-за всхлопывания margin:
+
+![всхлопывание margin](doc/img/margin_bug.png)
+
+Добавим фикс в `.details-info`:
 ```css
 .details-info {
   overflow: hidden;
@@ -132,12 +144,34 @@ Uncaught TypeError: Cannot read property 'destroy' of null
 ```
 
  Теперь график нагрузки отображается корректно. Переходим к следующему заданию.
- 
+
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/a9540b74c258f296d705e4ba1bb7590b2890f4b9) с исправлениями
+
 #### Если неисправный объект входит в кластер, то иконка кластера должна показывать, что в нем есть неисправная станция.
 
 В данном задание мне показалось что есть 2 решения:
-- отображение с помощью pieChart
-- отображение с помощью ClusterIcons
+
+- **отображение с помощью pieChart:**
+  - _все базовый станции_
+
+  ![первый вариант реализации: все состояния](doc/img/first_realization_all.png)
+  - _только активные базовые станции_
+
+  ![первый вариант реализации: активные](doc/img/first_realization_active.png)
+  - _только  не активные базовые станции_
+
+  ![первый вариант реализации: не активные](doc/img/first_realization_defective.png)
+
+- **отображение с помощью ClusterIcons:**
+  - _все базовый станции_
+
+  ![второй вариант реализации: все состояния](doc/img/second_realization_all.png)
+  - _только активные базовые станции_
+
+  ![второй вариант реализации: активные](doc/img/second_realization_active.png)
+  - _только  не активные базовые станции_
+
+  ![второй вариант реализации: не активные](doc/img/second_realization_defective.png)
 
 _**Решение отображение с помощью pieChart**_
 
@@ -146,16 +180,22 @@ _**Решение отображение с помощью pieChart**_
 ```js
   objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
 ```
-Так как она перебивае ранее установленные стили для кластеров при инициализации(`clusterIconLayout: 'default#pieChart',`)
+Так как она перебивает ранее установленные стили для кластеров при инициализации(`clusterIconLayout: 'default#pieChart',`)
+
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/3e969fc937b32f04e48f9e3cc15bcb048e3fe725) с исправлениями
 
 _**Решение отображение с помощью clusterIcon**_
 
 Для того чтобы посмотреть данную реализацию нужно выполнить команду:
+
 ```
 git checkout 08b1a2f
 ```
 
+Реализация:
+
 - удаляем из опций инициализации `clusterIconLayout: 'default#pieChart',`
+- оставляем `objectManager.clusters.options.set('preset', 'islands#greenClusterIcons')`, либо можно прописать в настройках инициализации objectManager `preset: 'islands#greenClusterIcons',`
 - добавляем обработчик события `add` на кластеры, который будет проверять есть ли в кластере неактивная станция, и если это так то цвет иконки меняется на красный.
 
 ```js
@@ -169,14 +209,27 @@ objectManager.clusters.events.add('add', () => {
 });
 ```
 
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/08b1a2fa37dba4460e035c5a30b0ac2ae076e281) с исправлениями
+
+#### Итог
+
 В итоге решил остановиться на первом варианте, так как показалось, что именно такое отображение было бы более логичным. И скорее всего такое решение и задумывалось, так как не предполагается, что в этом задании придется писать код.
 
 ### 4. Не должно быть лишнего кода.
 
-- в файле `src/map.js` в инициализации objectManage не нужны свойства `clusterDisableClickZoom`([API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/ClusterPlacemark-docpage)) и `gridSize`([API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/Clusterer-docpage/)) так как они cовпадают с значениями по умалчанию
+- в файле `src/map.js` в инициализации objectManage не нужны свойства `clusterDisableClickZoom`([API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/ClusterPlacemark-docpage)) и `gridSize`([API](https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/Clusterer-docpage/)) так как они совпадают с значениями по умолчанию
 - удалил `console.log` в файле `src/index.js`
 - удалил файл `src/popup.js` так как он не нужен, потому что вид попапа определяется в файле `src/details.js` с помощью `templateLayoutFactory`.
 
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/34d9e506269238d80922bce367b31abb2f6d06a2) с исправлениями
+
 ### 5. Все должно быть в едином codestyle.
 
-Так как не было никаких насторек в зависимостях `packaje.json`. То понял что по код стайлу нет никаких ограничений. Для обеспечения единого стиля кода прогнал все файлы через `Prettier`.
+Так как не было никаких настроек в зависимостях `packaje.json`. То понял что по код стайлу нет никаких ограничений. Для обеспечения единого стиля кода прогнал все файлы через `Prettier`.
+
+> [**commit**](https://github.com/MoonW1nd/solid-octo-funicular/commit/c836cc5cfa4865bd15d1bee2914827697e8b7c5e) с исправлениями
+
+
+### Дополнительно
+
+  - Добавил флаг `--host 0.0.0.0` для доступа к сайту с другой машины в той-же локальной сети
