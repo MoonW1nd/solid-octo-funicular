@@ -7,11 +7,6 @@ body,
   height: 100%;
 }
 
-.details-info {
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-
 .details-label {
   color: gray;
   text-transform: uppercase;
